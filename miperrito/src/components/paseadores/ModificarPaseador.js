@@ -2,54 +2,65 @@ import React, { useState, useEffect } from 'react';
 import { Button, Form, FormGroup } from 'react-bootstrap';
 import paseadoresService from '../../services/paseadoresService';
 import '../../App.css';
+import { useParams, useNavigate } from 'react-router-dom';
 
-const ModificarPaseador = ({ match }) => {
-  const [nompas, setNompas] = useState('');
-  const [tipide, setTipide] = useState('CC');
-  const [numide, setNumide] = useState('');
-  const [numcelpas, setNumcelpas] = useState('');
+const ModificarPaseador = () => {
+  const { id } = useParams();
+  console.log('ID obtenido:', id); // Mostrar el ID en la consola para verificar
+  const navigate = useNavigate(); // Hook para la navegación después de la modificación
+  const [nombre, setNombre] = useState('');
+  const [tipoIdentificacion, setTipoIdentificacion] = useState('CC');
+  const [identificacion, setIdentificacion] = useState('');
+  const [telefono, setTelefono] = useState('');
   const [email, setEmail] = useState('');
-  const [numcelemp, setNumcelemp] = useState('');
-  const [diremp, setDiremp] = useState('');
-  const [dirpas, setDirpas] = useState('');
-  const [imgpas, setImgpas] = useState(null);
+  const [telefonoEmpresa, setTelefonoEmpresa] = useState('');
+  const [direccionEmpresa, setDireccionEmpresa] = useState('');
+  const [direccionPaseador, setDireccionPaseador] = useState('');
+  const [foto, setFoto] = useState(null);
   const [tarifa, setTarifa] = useState('');
-  const [calpas, setCalpas] = useState(1);
+  const [calificacion, setCalificacion] = useState(1);
   const [loading, setLoading] = useState(false);
   const [previewImage, setPreviewImage] = useState(null);
 
-  const paseadorId = match.params.id;
-
   useEffect(() => {
+    // Verificar si id está definido
+    if (!id) {
+      console.error('El ID proporcionado es inválido.');
+      return;
+    }
+
     const fetchPaseador = async () => {
       try {
-        const paseador = await paseadoresService.obtenerPaseadorPorId(paseadorId);
-        setNompas(paseador.nompas);
-        setTipide(paseador.tipide);
-        setNumide(paseador.numide);
-        setNumcelpas(paseador.numcelpas);
+        const paseador = await paseadoresService.obtenerPaseadorPorId(id);
+        if (!paseador) {
+          console.error('No se encontró el paseador con el ID proporcionado.');
+          return;
+        }
+        setNombre(paseador.nombre);
+        setTipoIdentificacion(paseador.tipoIdentificacion);
+        setIdentificacion(paseador.identificacion);
+        setTelefono(paseador.telefono);
         setEmail(paseador.email);
-        setNumcelemp(paseador.numcelemp);
-        setDiremp(paseador.diremp);
-        setDirpas(paseador.dirpas);
+        setTelefonoEmpresa(paseador.telefonoEmpresa);
+        setDireccionEmpresa(paseador.direccionEmpresa);
+        setDireccionPaseador(paseador.direccionPaseador);
         setTarifa(paseador.tarifa);
-        setCalpas(paseador.calpas);
-        setPreviewImage(paseador.imgpas);
+        setCalificacion(paseador.calificacion);
+        setPreviewImage(paseador.foto);
       } catch (error) {
-        console.error('Error al obtener los datos del paseador:', error);
-        alert('Error al cargar los datos del paseador.');
+        console.error('Error al obtener el paseador:', error);
       }
     };
 
     fetchPaseador();
-  }, [paseadorId]);
+  }, [id]);
 
   const isValidEmail = (email) => /\S+@\S+\.\S+/.test(email);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setImgpas(file);
+      setFoto(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewImage(reader.result);
@@ -69,25 +80,27 @@ const ModificarPaseador = ({ match }) => {
     }
 
     const paseadorData = {
-      nompas,
-      tipide,
-      numide,
-      numcelpas,
+      nombre,
+      tipoIdentificacion,
+      identificacion,
+      telefono,
       email,
-      numcelemp,
-      diremp,
-      dirpas,
-      imgpas,
-      tarifa,
-      calpas,
+      telefonoEmpresa,
+      direccionEmpresa,
+      direccionPaseador,
+      foto,
+      tarifa: Number(tarifa),
+      calificacion: Number(calificacion),
     };
 
     try {
-      await paseadoresService.modificarPaseador(paseadorId, paseadorData);
-      alert('Paseador actualizado exitosamente.');
+      await paseadoresService.modificarPaseador(id, paseadorData);
+      alert('Paseador modificado exitosamente.');
+      navigate('/gestion-paseadores/listar'); // Navegar de vuelta a la lista de paseadores
     } catch (error) {
-      console.error('Error al actualizar el paseador:', error);
-      alert('Error al actualizar el paseador.');
+      console.error('Error al modificar el paseador:', error);
+      const errorMessage = error.response?.data?.message || 'Error al modificar el paseador.';
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -97,23 +110,23 @@ const ModificarPaseador = ({ match }) => {
     <div className="modificar-paseador-container">
       <h2>Modificar Paseador</h2>
       <Form onSubmit={handleSubmit}>
-        <FormGroup className="mb-3" controlId="nompas">
+        <FormGroup className="mb-3" controlId="nombre">
           <Form.Label>Nombres y Apellidos:</Form.Label>
           <Form.Control
             type="text"
-            value={nompas}
-            onChange={(e) => setNompas(e.target.value.toUpperCase())}
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value.toUpperCase())}
             required
             maxLength="100"
           />
         </FormGroup>
 
-        <FormGroup className="mb-3" controlId="tipide">
+        <FormGroup className="mb-3" controlId="tipoIdentificacion">
           <Form.Label>Tipo de Identificación:</Form.Label>
           <Form.Control
             as="select"
-            value={tipide}
-            onChange={(e) => setTipide(e.target.value)}
+            value={tipoIdentificacion}
+            onChange={(e) => setTipoIdentificacion(e.target.value)}
             required
           >
             <option value="CC">CC</option>
@@ -122,24 +135,23 @@ const ModificarPaseador = ({ match }) => {
           </Form.Control>
         </FormGroup>
 
-        <FormGroup className="mb-3" controlId="numide">
+        <FormGroup className="mb-3" controlId="identificacion">
           <Form.Label>Número de Identificación:</Form.Label>
           <Form.Control
             type="text"
-            value={numide}
-            onChange={(e) => setNumide(e.target.value)}
+            value={identificacion}
+            onChange={(e) => setIdentificacion(e.target.value)}
             required
             maxLength="20"
-            disabled
           />
         </FormGroup>
 
-        <FormGroup className="mb-3" controlId="numcelpas">
+        <FormGroup className="mb-3" controlId="telefono">
           <Form.Label>Teléfono de Contacto del Paseador:</Form.Label>
           <Form.Control
             type="text"
-            value={numcelpas}
-            onChange={(e) => setNumcelpas(e.target.value)}
+            value={telefono}
+            onChange={(e) => setTelefono(e.target.value)}
             required
             maxLength="20"
           />
@@ -156,43 +168,44 @@ const ModificarPaseador = ({ match }) => {
           />
         </FormGroup>
 
-        <FormGroup className="mb-3" controlId="numcelemp">
+        <FormGroup className="mb-3" controlId="telefonoEmpresa">
           <Form.Label>Teléfono de Contacto de la Empresa:</Form.Label>
           <Form.Control
             type="text"
-            value={numcelemp}
-            onChange={(e) => setNumcelemp(e.target.value)}
+            value={telefonoEmpresa}
+            onChange={(e) => setTelefonoEmpresa(e.target.value)}
             required
             maxLength="50"
           />
         </FormGroup>
 
-        <FormGroup className="mb-3" controlId="diremp">
+        <FormGroup className="mb-3" controlId="direccionEmpresa">
           <Form.Label>Dirección de la Empresa:</Form.Label>
           <Form.Control
             type="text"
-            value={diremp}
-            onChange={(e) => setDiremp(e.target.value)}
+            value={direccionEmpresa}
+            onChange={(e) => setDireccionEmpresa(e.target.value)}
             required
             maxLength="100"
           />
         </FormGroup>
 
-        <FormGroup className="mb-3" controlId="dirpas">
+        <FormGroup className="mb-3" controlId="direccionPaseador">
           <Form.Label>Dirección del Paseador:</Form.Label>
           <Form.Control
             type="text"
-            value={dirpas}
-            onChange={(e) => setDirpas(e.target.value)}
+            value={direccionPaseador}
+            onChange={(e) => setDireccionPaseador(e.target.value)}
             required
             maxLength="100"
           />
         </FormGroup>
 
-        <FormGroup className="mb-3" controlId="imgpas">
+        <FormGroup className="mb-3" controlId="foto">
           <Form.Label>Foto del Paseador:</Form.Label>
           <Form.Control
             type="file"
+            name="foto"
             accept="image/png, image/jpeg"
             onChange={handleImageChange}
           />
@@ -210,23 +223,25 @@ const ModificarPaseador = ({ match }) => {
             value={tarifa}
             onChange={(e) => setTarifa(e.target.value)}
             required
+            min="0"
+            step="any"
           />
         </FormGroup>
 
-        <FormGroup className="mb-3" controlId="calpas">
+        <FormGroup className="mb-3" controlId="calificacion">
           <Form.Label>Calificación del Paseador (1-10):</Form.Label>
           <Form.Control
             type="number"
-            value={calpas}
-            onChange={(e) => setCalpas(e.target.value)}
+            value={calificacion}
+            onChange={(e) => setCalificacion(e.target.value)}
             required
             min="1"
             max="10"
           />
         </FormGroup>
 
-        <Button variant="primary" type="submit" disabled={loading}>
-          {loading ? 'Actualizando...' : 'Actualizar Paseador'}
+        <Button variant="warning" type="submit" disabled={loading}>
+          {loading ? 'Modificando...' : 'Modificar Paseador'}
         </Button>
       </Form>
     </div>

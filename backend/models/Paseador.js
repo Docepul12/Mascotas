@@ -54,7 +54,7 @@ const PaseadorSchema = new mongoose.Schema({
   },
   foto: {
     type: String,
-    required: true // Imgpas (PNG/JPG)
+    required: false // Imgpas (PNG/JPG)
   },
   tarifa: {
     type: Number,

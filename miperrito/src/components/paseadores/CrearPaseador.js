@@ -42,27 +42,23 @@ const CrearPaseador = () => {
       return;
     }
 
-    // if (!foto) {
-    //   alert('Por favor, seleccione una foto para el paseador.');
-    //   setLoading(false);
-    //   return;
-    // }
+    const paseadorData = {
+      nombre,
+      tipoIdentificacion,
+      identificacion,
+      telefono,
+      email,
+      telefonoEmpresa,
+      direccionEmpresa,
+      direccionPaseador,
+      foto,
+      tarifa: Number(tarifa),
+      calificacion: Number(calificacion),
+    };
 
-    const formData = new FormData();
-    formData.append('nombre', nombre);
-    formData.append('tipoIdentificacion', tipoIdentificacion);
-    formData.append('identificacion', identificacion);
-    formData.append('telefono', telefono);
-    formData.append('email', email);
-    formData.append('telefonoEmpresa', telefonoEmpresa);
-    formData.append('direccionEmpresa', direccionEmpresa);
-    formData.append('direccionPaseador', direccionPaseador);
-    formData.append('foto', foto);
-    formData.append('tarifa', Number(tarifa)); // Convertir a número
-    formData.append('calificacion', Number(calificacion)); // Convertir a número
-
+    console.log(paseadorData);
     try {
-      await paseadoresService.crearPaseador(formData);
+      await paseadoresService.crearPaseador(paseadorData);
       alert('Paseador registrado exitosamente.');
       handleReset();
     } catch (error) {
@@ -191,7 +187,7 @@ const CrearPaseador = () => {
             name="foto"
             accept="image/png, image/jpeg"
             onChange={handleImageChange}
-            // required
+            required
           />
           {previewImage && (
             <div className="preview">
@@ -236,5 +232,3 @@ const CrearPaseador = () => {
 };
 
 export default CrearPaseador;
-
-

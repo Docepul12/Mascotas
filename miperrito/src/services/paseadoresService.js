@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api/paseadores';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api/paseadores';
 
 // Función auxiliar para manejar los errores
 const handleAxiosError = (error) => {
@@ -32,24 +32,24 @@ const paseadoresService = {
       console.log('Paseador creado exitosamente:', response.data);
       return response.data;
     } catch (error) {
-     // Depurar el error
-     console.error('Error al enviar el formulario:', error);
+      // Depurar el error
+      console.error('Error al enviar el formulario:', error);
 
-     if (error.response) {
-         // Respuesta del servidor con error
-         console.error('Datos del error (error.response):', error.response.data);
-         console.error('Código de estado:', error.response.status);
-         console.error('Encabezados:', error.response.headers);
-     } else if (error.request) {
-         // No se recibió respuesta del servidor
-         console.error('Solicitud realizada, sin respuesta (error.request):', error.request);
-     } else {
-         // Otro tipo de error
-         console.error('Error desconocido:', error.message);
-     }
+      if (error.response) {
+        // Respuesta del servidor con error
+        console.error('Datos del error (error.response):', error.response.data);
+        console.error('Código de estado:', error.response.status);
+        console.error('Encabezados:', error.response.headers);
+      } else if (error.request) {
+        // No se recibió respuesta del servidor
+        console.error('Solicitud realizada, sin respuesta (error.request):', error.request);
+      } else {
+        // Otro tipo de error
+        console.error('Error desconocido:', error.message);
+      }
 
-     // Propagar el error o manejarlo
-     handleAxiosError(error);
+      // Propagar el error o manejarlo
+      handleAxiosError(error);
     }
   },
 
@@ -63,10 +63,20 @@ const paseadoresService = {
     }
   },
 
+  obtenerPaseadorPorId: async (id) => {
+    try {
+      const response = await axios.get(`${API_URL}/${id}`);
+      console.log('Paseador obtenido exitosamente:', response.data);
+      return response.data;
+    } catch (error) {
+      handleAxiosError(error);
+    }
+  },
+
   modificarPaseador: async (id, paseadorData) => {
     try {
       let response;
-      if (paseadorData.hasFile) {  // Verificar que el objeto contiene un archivo
+      if (paseadorData.hasFile) { // Verificar si hay un archivo
         const formData = createFormData(paseadorData);
         response = await axios.put(`${API_URL}/${id}`, formData, {
           headers: {

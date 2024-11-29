@@ -14,12 +14,7 @@ const GestionPaseadores = () => {
         <Link to="/gestion-paseadores/listar">
           <Button variant="secondary" className="m-2">Listar Paseadores</Button>
         </Link>
-        <Link to="/gestion-paseadores/modificar">
-          <Button variant="warning" className="m-2">Modificar Paseador</Button>
-        </Link>
-        <Link to="/gestion-paseadores/eliminar">
-          <Button variant="danger" className="m-2">Eliminar Paseador</Button>
-        </Link>
+        
       </div>
     </div>
   );

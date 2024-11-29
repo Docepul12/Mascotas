@@ -1,8 +1,11 @@
-// Importar dependencias necesarias
+// Importar dependencias necesarias 
 const express = require('express');
 const router = express.Router();
 const Paseador = require('../models/Paseador'); // Importa el modelo de Paseador
 const multer = require('multer');
+const fs = require('fs');
+
+// Configuración de multer para manejar la subida de imágenes
 const upload = multer({ dest: 'uploads/' }); // Carpeta donde se guardarán las imágenes
 
 // Ruta para obtener todos los paseadores
@@ -47,7 +50,6 @@ router.post('/', upload.single('foto'), async (req, res) => {
   } catch (error) {
     console.error('Error al agregar paseador:', error);
 
-    // Manejo de errores específicos de Mongoose
     if (error.name === 'ValidationError') {
       return res.status(400).send(`Error de validación: ${error.message}`);
     }
@@ -75,13 +77,62 @@ router.get('/:id', async (req, res) => {
 });
 
 // Ruta para actualizar un paseador por ID
-router.put('/:id', async (req, res) => {
+router.put('/:id', upload.single('foto'), async (req, res) => {
   try {
-    const paseadorActualizado = await Paseador.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
-    if (!paseadorActualizado) {
+    const { id } = req.params;
+
+    // Obtener el paseador actual
+    const paseadorActual = await Paseador.findById(id);
+    if (!paseadorActual) {
       return res.status(404).send('Paseador no encontrado');
     }
-    res.send(`Paseador con ID ${req.params.id} actualizado exitosamente`);
+
+    // Construir los datos para la actualización
+    const {
+      nombre,
+      tipoIdentificacion,
+      identificacion,
+      telefono,
+      email,
+      telefonoEmpresa,
+      direccionEmpresa,
+      direccionPaseador,
+      tarifa,
+      calificacion,
+    } = req.body;
+
+    // Si no se proporciona una nueva foto, mantener la existente
+    let foto = paseadorActual.foto;
+    if (req.file) {
+      // Eliminar la foto antigua si existe
+      if (paseadorActual.foto) {
+        fs.unlink(paseadorActual.foto, (err) => {
+          if (err) console.error('Error al eliminar la foto antigua:', err);
+        });
+      }
+      foto = req.file.path; // Ruta del archivo subido
+    }
+
+    // Actualizar los datos del paseador
+    const paseadorActualizado = await Paseador.findByIdAndUpdate(
+      id,
+      {
+        nombre,
+        tipoIdentificacion,
+        identificacion,
+        telefono,
+        email,
+        telefonoEmpresa,
+        direccionEmpresa,
+        direccionPaseador,
+        tarifa,
+        calificacion,
+        foto,
+      },
+      { new: true, runValidators: true }
+    );
+
+    res.send(`Paseador con ID ${id} actualizado exitosamente`);
   } catch (error) {
     console.error('Error al actualizar paseador:', error);
 
@@ -100,6 +151,14 @@ router.delete('/:id', async (req, res) => {
     if (!paseadorEliminado) {
       return res.status(404).send('Paseador no encontrado');
     }
+
+    // Eliminar la foto asociada al paseador eliminado
+    if (paseadorEliminado.foto) {
+      fs.unlink(paseadorEliminado.foto, (err) => {
+        if (err) console.error('Error al eliminar la foto asociada:', err);
+      });
+    }
+
     res.send(`Paseador con ID ${req.params.id} eliminado exitosamente`);
   } catch (error) {
     console.error('Error al eliminar paseador:', error);
@@ -109,5 +168,3 @@ router.delete('/:id', async (req, res) => {
 
 // Exportar el enrutador
 module.exports = router;
-
-

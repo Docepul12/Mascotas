@@ -16,10 +16,13 @@ const Home = () => {
         <div className="feature">
           <h3>Gestión de Dueños</h3>
           <p>Mantén un registro actualizado de los dueños y gestiona su información de manera efectiva.</p>
+          <Link to="/gestion-duenos">Gestión de Dueños</Link>
         </div>
         <div className="feature">
           <h3>Gestión de Mascotas</h3>
           <p>Agrega, modifica y elimina información de las mascotas en el sistema.</p>
+          <Link to="/gestion-mascotas">Gestión de Mascotas</Link>
+
         </div>
         <div className="feature">
           <h3>Programación de Paseos</h3>
